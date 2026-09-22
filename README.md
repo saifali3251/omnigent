@@ -2,18 +2,18 @@
 
 Two independent services, not one:
 
-- **Holodeck** (`../holodeck/`) — a FastAPI control-plane process. Runs as
-  a plain `python3 -m holodeck.main`, not a container, per
+- **Meeseek** (`../meeseek/`) — a FastAPI control-plane process. Runs as
+  a plain `python3 -m meeseek.main`, not a container, per
   `setup-omnigent-poc-box.sh`.
-- **Omnigent** (here) — a Docker container. Talks to Holodeck over HTTP
-  (`HOLODECK_URL`); Holodeck knows nothing about how Omnigent is deployed.
+- **Omnigent** (here) — a Docker container. Talks to Meeseek over HTTP
+  (`HOLODECK_URL`); Meeseek knows nothing about how Omnigent is deployed.
 
 Both can run on the same VM (that's the current plan — see
 `../../docs/10-omnigent-gce-deployment.md`), but this folder deliberately
-has no path that reaches into `../holodeck/` except one clearly-marked
+has no path that reaches into `../meeseek/` except one clearly-marked
 script (`scripts/sync-wheel.sh`). Everything else here — the Dockerfile,
 the compose file — only ever looks at `./wheels/*.whl`, a local staging
-directory. Swapping Holodeck for a different harness later means writing a
+directory. Swapping Meeseek for a different harness later means writing a
 different sync script (or none, if the new harness hands you a wheel
 directly); the Dockerfile doesn't change.
 
@@ -30,7 +30,7 @@ omnigent-deploy/
   wheels/                 sandbox-provider wheel(s) go here before building —
                           empty by default; populated by sync-wheel.sh
   scripts/
-    sync-wheel.sh          the ONE script that knows Holodeck exists — copies
+    sync-wheel.sh          the ONE script that knows Meeseek exists — copies
                           (optionally rebuilds) its provider wheel into ./wheels/
     pull-env.sh            CLOUD=aws|gcp|local — writes omnigent/.env from a
                           cloud secret store (or .env.example for local/first bring-up)
@@ -41,7 +41,7 @@ omnigent-deploy/
 ## Running it on EC2/GCE
 
 ```bash
-# 1. pull in the current Holodeck sandbox-provider wheel
+# 1. pull in the current Meeseek sandbox-provider wheel
 ./scripts/sync-wheel.sh
 
 # 2. get the env bundle — CLOUD=local for a first run before any cloud secret exists
@@ -97,8 +97,8 @@ docker compose logs -f omnigent          # watch it boot
 
 Visit `http://localhost:8000` — you should land on the Create-admin form.
 If you also want the full loop (a host actually registering), run
-Holodeck's control plane locally too (`cd ../../holodeck/control-plane &&
-python3 -m holodeck.main`, per that repo's own README) and point
+Meeseek's control plane locally too (`cd ../../meeseek/control-plane &&
+python3 -m meeseek.main`, per that repo's own README) and point
 `HOLODECK_URL` at it.
 
 ## Updating the sandbox-provider wheel
