@@ -13,7 +13,7 @@
 # Required env vars:
 #   HOLODECK_TOKEN   must match the control plane's own HOLODECK_TOKEN
 set -euo pipefail
-: "${HOLODECK_TOKEN:?set HOLODECK_TOKEN — must match the control plane's}"
+: "${HOLODECK_TOKEN:?set HOLODECK_TOKEN - must match the control plane token}"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DEPLOY_DIR="${OMNIGENT_DEPLOY_DIR:-$HERE/../omnigent}"
 
@@ -43,11 +43,8 @@ if ! ls "$HERE/../wheels"/*.whl >/dev/null 2>&1; then
   "$HERE/sync-wheel.sh"
 fi
 
-# GCE's metadata server gives the external IP directly, no third-party
-# lookup needed — this call shape IS verified against GCE's documented
-# metadata API, even though the script as a whole has never been run.
-PUBLIC_IP="$(curl -sf -H 'Metadata-Flavor: Google' \
-  'http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip')"
+# GCE metadata server gives the external IP directly
+PUBLIC_IP="$(curl -sf -H 'Metadata-Flavor: Google' 'http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip')"
 PUBLIC_HOST="${PUBLIC_IP}.sslip.io"
 log "public host for this VM: $PUBLIC_HOST"
 sed -i.bak \
@@ -56,10 +53,8 @@ sed -i.bak \
   -e "s#^OMNIGENT_PUBLIC_HOST=.*#OMNIGENT_PUBLIC_HOST=${PUBLIC_HOST}#" \
   "$DEPLOY_DIR/.env"
 
-log "building + starting (identical to the AWS path from here — Dockerfile and docker-compose.yml are shared, not duplicated)"
+log "building + starting omnigent and caddy"
 (cd "$DEPLOY_DIR" && docker compose build && docker compose --profile tls up -d)
 
 log "done. Visit https://${PUBLIC_HOST}"
-log "VPC FIREWALL REMINDER: needs an allow-rule for 80/tcp + 443/tcp ingress —"
-log "  GCP's equivalent of the AWS security-group step. Deny-by-default like AWS,"
-log "  so this won't work until that rule exists."
+log "VPC FIREWALL REMINDER: needs an allow-rule for 80/tcp + 443/tcp ingress"
