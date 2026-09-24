@@ -1,0 +1,29 @@
+# {$OMNIGENT_PUBLIC_HOST} is a *.sslip.io hostname that resolves to the
+# box's own public IP (no domain registration needed for the POC) — Caddy
+# issues a real Let's Encrypt cert for it automatically via the HTTP-01
+# challenge, which means port 80 must be reachable from the internet, at
+# least for issuance/renewal. Open 80/tcp and 443/tcp on the box's
+# security group / VPC firewall, not just 443.
+#
+# Only used with `docker compose --profile tls up` (EC2/GCE) — not part of
+# a local Docker Desktop run.
+{$OMNIGENT_PUBLIC_HOST} {
+    # Meeseek Console and API
+    handle /ops* {
+        reverse_proxy host.docker.internal:8099
+    }
+    handle /leases* {
+        reverse_proxy host.docker.internal:8099
+    }
+    handle /readyz* {
+        reverse_proxy host.docker.internal:8099
+    }
+    handle /console* {
+        reverse_proxy host.docker.internal:8099
+    }
+
+    # Omnigent Agent UI and API (everything else)
+    handle {
+        reverse_proxy omnigent:8000
+    }
+}

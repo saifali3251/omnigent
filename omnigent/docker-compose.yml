@@ -1,0 +1,82 @@
+# Omnigent, standalone. This folder knows nothing about how Holodeck (or
+# whatever harness replaces it later) is deployed — it only needs a
+# reachable HOLODECK_URL, same as any other Omnigent sandbox-provider
+# config. On the EC2/GCE box, Holodeck's own control plane runs as a plain
+# `python3 -m holodeck.main` process (a separate clone, a separate folder,
+# possibly a separate repo) — this compose stack reaches it over
+# localhost:8099. No firewall rule needed for that leg.
+#
+# Run from THIS directory. Two ways to bring it up:
+#   Local (Docker Desktop, no public IP, no TLS):
+#     docker compose up -d postgres omnigent
+#   EC2/GCE (public IP, TLS via Caddy — profile "tls" pulls it in):
+#     docker compose --profile tls up -d
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: omnigent
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: omnigent
+    volumes:
+      - omnigent-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U omnigent"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  omnigent:
+    build:
+      context: ..
+      dockerfile: omnigent/Dockerfile
+    image: omnigent:local
+    # Without this, compose tries to PULL "omnigent:local" from Docker Hub
+    # first (it doesn't exist there — expect a harmless-but-alarming-looking
+    # "pull access denied" line) before falling back to building it. This
+    # skips straight to building.
+    pull_policy: build
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file: .env
+    environment:
+      # Local Postgres, not RDS/Cloud SQL — simplest thing that works for a
+      # single-box POC (or a laptop). Omnigent needs Postgres for its own
+      # accounts (login) and conversation/session state — see docs.
+      DATABASE_URL: postgresql://omnigent:${POSTGRES_PASSWORD}@postgres:5432/omnigent
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - omnigent-artifacts:/data/artifacts
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  caddy:
+    image: caddy:2
+    profiles: ["tls"]   # only started with --profile tls (EC2/GCE, not local)
+    restart: unless-stopped
+    depends_on:
+      - omnigent
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      OMNIGENT_PUBLIC_HOST: ${OMNIGENT_PUBLIC_HOST:-localhost}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy-data:/data
+
+volumes:
+  omnigent-postgres:
+  omnigent-artifacts:
+  caddy-data:

@@ -1,0 +1,14 @@
+holodeck-data/
+ws/
+*.log
+.DS_Store
+
+# per-machine config (paths, host-specific build commands) — never commit
+holodeck.local.env
+.env
+.env.example
+
+# holodeck: never commit bytecode
+__pycache__/
+*.pyc
+
