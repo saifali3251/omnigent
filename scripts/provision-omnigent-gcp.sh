@@ -43,8 +43,12 @@ if ! ls "$HERE/../wheels"/*.whl >/dev/null 2>&1; then
   "$HERE/sync-wheel.sh"
 fi
 
-# GCE metadata server gives the external IP directly
-PUBLIC_IP="$(curl -sf -H 'Metadata-Flavor: Google' 'http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip')"
+# GCE metadata server gives the external IP directly, with public fallbacks
+PUBLIC_IP="$(curl -sf -H 'Metadata-Flavor: Google' 'http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip' || curl -sf https://ifconfig.me || curl -sf https://api.ipify.org || true)"
+if [ -z "$PUBLIC_IP" ]; then
+  err "Could not detect external IP. Please specify OMNIGENT_PUBLIC_HOST=<IP>.sslip.io in .env manually."
+  exit 1
+fi
 PUBLIC_HOST="${PUBLIC_IP}.sslip.io"
 log "public host for this VM: $PUBLIC_HOST"
 sed -i.bak \
