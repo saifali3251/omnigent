@@ -2,8 +2,6 @@
 {
     on_demand_tls {
         ask http://host.docker.internal:8099/caddy-ask
-        interval 2m
-        burst 5
     }
 }
 
@@ -26,6 +24,9 @@
         reverse_proxy host.docker.internal:8099
     }
     handle /environments* {
+        reverse_proxy host.docker.internal:8099
+    }
+    handle /webhooks* {
         reverse_proxy host.docker.internal:8099
     }
 
