@@ -29,6 +29,9 @@
     handle /webhooks* {
         reverse_proxy host.docker.internal:8099
     }
+    handle /onboarding* {
+        reverse_proxy host.docker.internal:8099
+    }
 
     # Omnigent Agent UI and API (everything else)
     handle {
