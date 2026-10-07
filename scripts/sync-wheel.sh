@@ -20,7 +20,8 @@
 #
 # Env override (default assumes the sibling layout this repo currently
 # has — code/holodeck/ and code/omnigent-deploy/ side by side):
-#   PROVIDER_DIR=/path/to/omnigent-provider ./sync-wheel.sh
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 if [[ -z "${PROVIDER_DIR:-}" ]]; then
   if [[ -d "/opt/holo/holodeck/control-plane/omnigent-provider" ]]; then
     PROVIDER_DIR="/opt/holo/holodeck/control-plane/omnigent-provider"
