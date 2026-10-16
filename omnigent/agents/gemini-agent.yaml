@@ -1,0 +1,21 @@
+spec_version: 1
+name: gemini-agent
+description: Gemini coding agent powered by Google Antigravity SDK
+executor:
+  type: omnigent
+  config:
+    harness: antigravity
+os_env:
+  type: caller_process
+  cwd: .
+  sandbox:
+    type: none
+terminals:
+  shell:
+    command: /bin/bash
+    allow_cwd_override: true
+    os_env:
+      type: caller_process
+      sandbox:
+        type: none
+
