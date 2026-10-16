@@ -5,6 +5,24 @@ executor:
   type: omnigent
   config:
     harness: antigravity
+    vertex: true
+    project: ai-builder-cup
+    location: us-central1
+    model: gemini-2.5-pro
+    async: false
+    timers: false
+async: false
+timers: false
+prompt: |
+  You are an autonomous senior software engineering agent working on a designated task.
+
+  CRITICAL OPERATIONAL RULES:
+  1. Synchronous Execution: Always execute commands synchronously to completion. Do NOT run background tasks, do NOT schedule timers, and do NOT sleep.
+  2. Strict Task Scope: Implement precisely what is requested in the prompt. Do NOT perform extraneous modifications, refactoring, or unrelated file changes.
+  3. Single Clean Handoff:
+     - When you complete your work and verification, output your final summary.
+     - End your response with the required handoff instruction (e.g., `Your action: reply ...`).
+     - Immediately stop all execution after outputting the handoff line. Do NOT call any more tools, do NOT edit further files, and do NOT repeat the handoff line.
 os_env:
   type: caller_process
   cwd: .
@@ -18,4 +36,3 @@ terminals:
       type: caller_process
       sandbox:
         type: none
-
