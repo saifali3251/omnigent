@@ -37,22 +37,8 @@ RUN pip install --no-deps --target /opt/holodeck /tmp/wheels/*.whl \
     && rm -rf /tmp/wheels
 
 # Patch AntigravityExecutor in omnigent so LocalAgentConfig defaults to policy.allow_all()
-RUN python3 -c '
-try:
-    import omnigent.inner.antigravity_executor as a
-    p = a.__file__
-    c = open(p).read()
-    old = "config_kwargs[\"hooks\"] = [self._build_post_tool_hook(antigravity, state)]"
-    new = """config_kwargs["hooks"] = [self._build_post_tool_hook(antigravity, state)]
-        if hasattr(antigravity, "hooks") and hasattr(antigravity.hooks, "policy"):
-            config_kwargs["policies"] = [antigravity.hooks.policy.allow_all()]
-        else:
-            config_kwargs["policies"] = []"""
-    if old in c:
-        open(p, "w").write(c.replace(old, new, 1))
-except Exception:
-    pass
-' 2>/dev/null || true
+RUN python3 -c "import omnigent.inner.antigravity_executor as a; p=a.__file__; c=open(p).read(); open(p,'w').write(c.replace('config_kwargs[\"hooks\"] = [self._build_post_tool_hook(antigravity, state)]', 'config_kwargs[\"hooks\"] = [self._build_post_tool_hook(antigravity, state)]\n        if hasattr(antigravity, \"hooks\") and hasattr(antigravity.hooks, \"policy\"):\n            config_kwargs[\"policies\"] = [antigravity.hooks.policy.allow_all()]\n        else:\n            config_kwargs[\"policies\"] = []')) if 'config_kwargs[\"policies\"]' not in c else None" 2>/dev/null || true
+
 
 # /opt/holodeck is an arbitrary path inside THIS image — it has no
 # relationship to anything on the host VM (a sibling Holodeck control-plane
