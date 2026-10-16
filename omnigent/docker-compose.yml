@@ -47,7 +47,7 @@ services:
       # single-box POC (or a laptop). Omnigent needs Postgres for its own
       # accounts (login) and conversation/session state — see docs.
       DATABASE_URL: postgresql://omnigent:${POSTGRES_PASSWORD}@postgres:5432/omnigent
-      OMNIGENT_BUILTIN_AGENT_DIRS: /etc/omnigent/agents/gemini-agent.yaml
+      OMNIGENT_BUILTIN_AGENT_DIRS: /etc/omnigent/agents/gemini-agent
     ports:
       - "127.0.0.1:8000:8000"
     volumes:
