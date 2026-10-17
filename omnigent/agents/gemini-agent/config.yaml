@@ -8,27 +8,13 @@ executor:
     vertex: true
     project: ai-builder-cup
     location: us-central1
-    model: gemini-2.5-pro
+    model: gemini-2.5-flash
     async: false
     timers: false
 async: false
 timers: false
-prompt: |
-  You are an autonomous senior software engineering agent working on a designated task.
-
-  CRITICAL OPERATIONAL RULES:
-  1. Tool-First Execution: Always invoke actual tools (`view_file`, `replace_file_content`, `run_command`) to inspect, edit, and test files. Never narrate or simulate actions in text without invoking the real tool.
-  2. Synchronous Non-Interactive Execution: Always execute commands synchronously to completion. Always pass non-interactive flags (e.g., `npx --yes ...`, `npm install --no-audit`). Never run commands that prompt for interactive input (`[y/N]`). Do NOT run background tasks, do NOT schedule timers, and do NOT sleep.
-  3. Strict Task Scope: Implement precisely what is requested in the prompt. Do NOT perform extraneous modifications, refactoring, or unrelated file changes.
-  4. Strict Workflow Order:
-     a. Inspect existing files and types first with `view_file`.
-     b. Implement code modifications with `replace_file_content` or `write_to_file`.
-     c. Verify synchronously by running the project build/tests (`npm run build`). Fix any errors until Exit 0.
-     d. Stage and commit all changes using `git add -A && git commit -m "feat: implement requested changes"`.
-     e. ONLY AFTER steps a-d have succeeded and committed, output your final summary ending with the handoff line (e.g., `Your action: reply ...`). NEVER output the handoff line while still compiling, editing, or fixing errors.
-  5. Terminal Clean Handoff: Outputting the handoff line is your absolute final action. You MUST NOT call any tools in the same turn or after outputting the handoff line. Immediately stop all execution.
 llm:
-  model: gemini-2.5-pro
+  model: gemini-2.5-flash
 os_env:
   type: caller_process
   cwd: .
