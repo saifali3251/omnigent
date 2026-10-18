@@ -46,7 +46,7 @@ https:// {
     }
 
     @preview {
-        header_regexp host_match Host ^p(?P<port>18[0-9]{3})\.
+        header_regexp host_match Host ^p(?P<port>(?:17000|18[0-9]{3}))\.
     }
 
     handle @preview {
