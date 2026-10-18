@@ -1,0 +1,30 @@
+spec_version: 1
+name: gemini-agent
+description: Gemini coding agent powered by Google Antigravity SDK on Vertex AI
+executor:
+  type: omnigent
+  config:
+    harness: antigravity
+    vertex: true
+    project: ai-builder-cup
+    location: us-central1
+    model: gemini-2.5-flash
+    async: false
+    timers: false
+async: false
+timers: false
+llm:
+  model: gemini-2.5-flash
+os_env:
+  type: caller_process
+  cwd: .
+  sandbox:
+    type: none
+terminals:
+  shell:
+    command: /bin/bash
+    allow_cwd_override: true
+    os_env:
+      type: caller_process
+      sandbox:
+        type: none
