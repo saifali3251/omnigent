@@ -7,7 +7,7 @@ executor:
     harness: antigravity
     vertex: true
     project: ai-builder-cup
-    location: us-central1
+    location: global
     model: gemini-2.5-flash
     async: false
     timers: false
